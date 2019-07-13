@@ -1,0 +1,25 @@
+Package: ranglr
+Type: Package
+Title: ranglr: a set of tools for HCA Data Wranglers
+Version: 0.1.0
+Authors@R: person("First", "Last", email = "mshadbolt@ebi.ac.uk",
+                role = c("aut", "cre"))
+Maintainer: Marion Shadbolt <mshadbolt@ebi.ac.uk>
+Description: A collection of tools to help with Wrangling and wrangling review 
+   process. The aim is to automate some processes and improve efficiency and
+   productivity.
+License: MIT
+Encoding: UTF-8
+LazyData: true
+Depends: R (>= 3.6.1)
+Imports:
+    dplyr,
+    ggplot2,
+    igraph,
+    readr,
+    readxl,
+    RColorBrewer,
+    testthat,
+    tidyr,
+    usethis
+RoxygenNote: 6.1.1

@@ -16,10 +16,18 @@ Imports:
     dplyr,
     ggplot2,
     igraph,
+    magrittr,
     readr,
     readxl,
     RColorBrewer,
+    stringr,
+    purrr,
     testthat,
+    tibble,
     tidyr,
     usethis
 RoxygenNote: 6.1.1
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr

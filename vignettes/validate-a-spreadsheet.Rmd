@@ -1,0 +1,70 @@
+---
+title: "validate-a-spreadsheet"
+author: "Marion Shadbolt"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{validate-a-spreadsheet}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(ranglr)
+```
+
+# Load a spreadsheet
+
+```{r}
+metadata_spreadsheet <- ranglr::load_spreadsheet("../../../../Google Drive File Stream/My Drive/Brokering/PROJECTS - IN PROGRESS/GSE95459 - GSE114374/hca-metadata-spreadsheet-GSE95459-GSE114374-colon.xlsx")
+names(metadata_spreadsheet)
+```
+
+```{r}
+metadata_spreadsheet$`Project` %>% 
+  dplyr::mutate_at(dplyr::vars(dplyr::contains("accession")), stringr::str_length) %>%
+  View()
+```
+
+I think it would be good to see an overall summary of the spreadsheet. Functionality to include:
+* number of accessions
+* 
+
+```{r}
+summarise_spreadsheet(metadata_spreadsheet)
+```
+
+Going to resort to a nested loop but I'm sure there is a better way.
+
+```{r linking_df}
+build_linking_df(metadata_spreadsheet)
+```
+
+
+Need to make a lookup table to look up all column names by a sheet name and vice versa.
+
+```{r lookup_columns_by_sheet}
+build_type_module_lookup(metadata_spreadsheet)
+```
+
+
+<!-- Leaving this here because I might be able to use simliar code and don't want
+to forget about these functions-->
+<!-- ```{r} -->
+<!-- purrr::map2_dfr(.x = metadata_spreadsheet, -->
+<!--                 .y = metadata_spreadsheet, -->
+<!--                 .f = ~get_linking_fields(.x, .y)) %>% View() -->
+
+<!-- purrr::map2_dfr(.x = metadata_spreadsheet, -->
+<!--                 .y = names(metadata_spreadsheet), -->
+<!--                 .f = colnames) -->
+<!-- ``` -->
+
+

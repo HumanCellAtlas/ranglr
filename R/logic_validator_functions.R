@@ -23,7 +23,18 @@ build_linking_df <- function(tibble_list) {
     dplyr::filter(!is.na(linking_field),
                   !type_module_1 == type_module_2) %>%
     dplyr::group_by(linking_field) %>%
-    dplyr::filter(dplyr::row_number() == 1)
+    dplyr::filter(dplyr::row_number() == 1) %>%
+    dplyr::ungroup()
+
+  type_module_lookup <- build_type_module_lookup(tibble_list)
+  linking_df <- linking_df %>%
+    dplyr::left_join(type_module_lookup %>%
+                       dplyr::select(-col_name), by = c("type_module_1" = "type_module")) %>%
+    dplyr::rename(sheet_name_1 = sheet_name)  %>%
+    dplyr::left_join(type_module_lookup %>%
+                       dplyr::select(-col_name), by = c("type_module_2" = "type_module")) %>%
+    dplyr::rename(sheet_name_2 = sheet_name)  %>%
+    dplyr::select(sheet_name_1, sheet_name_2, linking_field)
   return(linking_df)
 }
 
@@ -43,8 +54,65 @@ build_type_module_lookup <- function(tibble_list) {
     dplyr::mutate(type_module = paste0(stringr::str_split(col_name,
                                                           pattern = "\\.",
                                                           simplify = T)[c(1,2)],
-                                       collapse = "."))
+                                       collapse = ".")) %>%
+    dplyr::ungroup()
   return(lookup_df)
+}
+
+#' Validate link levels
+#'
+#' \code{validate_link_levels} checks the levels of a linking field are
+#' consistent between two tabs of the spreadsheet. It is currently not very
+#' elegantly written.
+#'
+#' @param linking_df output from running \code{build_linking_df}
+#' @return linking_df with two additional columns
+#' @export
+validate_link_levels <- function(linking_df) {
+  all_1_in_2 <- rep(FALSE, length(linking_df$sheet_name_1))
+  all_2_in_1 <- rep(FALSE, length(linking_df$sheet_name_1))
+  for (i in 1:length(linking_df$sheet_name_1)) {
+    tab_1_fields <- dplyr::pull(metadata_spreadsheet[[linking_df$sheet_name_1[i]]][linking_df$linking_field[i]])
+    tab_2_fields <- dplyr::pull(metadata_spreadsheet[[linking_df$sheet_name_2[i]]][linking_df$linking_field[i]])
+    tab_1_split <- unlist(lapply(tab_1_fields, split_field_list))
+    tab_2_split <- unlist(lapply(tab_2_fields, split_field_list))
+    tab_1_levels <- levels(factor(tab_1_split))
+    tab_2_levels <- levels(factor(tab_2_split))
+    all_1_in_2[i] <- all(tab_1_levels %in% tab_2_levels)
+    all_2_in_1[i] <- all(tab_1_levels %in% tab_2_levels)
+  }
+
+  linking_df$all_1_in_2 <- all_1_in_2
+  linking_df$all_2_in_1 <- all_2_in_1
+  return(linking_df)
+}
+
+#' Check uploaded files s3
+#'
+#' \code{check_uploaded_files} cross references the files listed in the
+#' spreadsheet against the files currently in the s3 and warns the user if there are
+#' inconsistencies.
+#'
+#' @param ssheet_file_names result of
+#' @param s3_file_names result of `list_s3_files$file_name`
+#' @export
+check_uploaded_files <- function(ssheet_file_names, s3_file_names) {
+  if (all(ssheet_file_names %in% s3_file_names)){
+    message("All Spreadsheet files present in s3 bucket")
+  } else {
+    missing_files <- ssheet_file_names[which(!ssheet_file_names %in% s3_file_names)]
+    warning(paste0("There are ", length(missing_files), " files not in the spreadsheet that are not in the s3 bucket:\n",
+                   paste0(missing_files,
+                   collapse = "\n"), "\n\n"))
+  }
+  if (all(s3_file_names %in% ssheet_file_names)) {
+    message("There are no extra files in the s3 bucket")
+  } else {
+    extra_files <- s3_file_names[which(!s3_file_names %in% ssheet_file_names)]
+    warning(paste0("There are ", length(extra_files), " files in the s3 bucket that are not in your spreadsheet:\n",
+                   paste0(extra_files,
+                   collapse = "\n"), "\n"))
+  }
 }
 
 # All cell suspensions in the files tabs

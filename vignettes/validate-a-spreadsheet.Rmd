@@ -16,43 +16,221 @@ knitr::opts_chunk$set(
 )
 ```
 
+# Goals
+
+This document aims to summarise some of the functionality of the `ranglr` R pacakge. The package aims to provide functions and tools to help primary wranglers wrangle their data and secondary wranglers review a dataset.
+
 ```{r setup}
 library(ranglr)
 ```
 
-# Load a spreadsheet
+# General Functionality
 
-```{r}
-metadata_spreadsheet <- ranglr::load_spreadsheet("../../../../Google Drive File Stream/My Drive/Brokering/PROJECTS - IN PROGRESS/GSE95459 - GSE114374/hca-metadata-spreadsheet-GSE95459-GSE114374-colon.xlsx")
+## Load a spreadsheet
+
+```{r load_spreadsheet}
+metadata_spreadsheet <- load_spreadsheet("../../../../Google Drive File Stream/My Drive/Brokering/PROJECTS - IN PROGRESS/GSE95459 - GSE114374/hca-metadata-spreadsheet-GSE95459-GSE114374-colon.xlsx")
 names(metadata_spreadsheet)
 ```
 
-```{r}
-metadata_spreadsheet$`Project` %>% 
-  dplyr::mutate_at(dplyr::vars(dplyr::contains("accession")), stringr::str_length) %>%
-  View()
-```
+## Summarise a spreadsheet
 
 I think it would be good to see an overall summary of the spreadsheet. Functionality to include:
 * number of accessions
 * 
 
-```{r}
+```{r summarise_spreadsheet}
 summarise_spreadsheet(metadata_spreadsheet)
 ```
+
+## Build a dataframe with list of all column names found in each sheet
+
+
+```{r}
+get_file_names(metadata_spreadsheet)
+```
+
+## Build a linking data frame
 
 Going to resort to a nested loop but I'm sure there is a better way.
 
 ```{r linking_df}
-build_linking_df(metadata_spreadsheet)
+linking_df <- build_linking_df(metadata_spreadsheet)
 ```
 
+## Build type module lookup table
 
 Need to make a lookup table to look up all column names by a sheet name and vice versa.
 
 ```{r lookup_columns_by_sheet}
-build_type_module_lookup(metadata_spreadsheet)
+type_module_lookup <- build_type_module_lookup(metadata_spreadsheet)
 ```
+
+incorporate this into the build linking df code so that there are explicit sheet
+names
+
+Now done automatically within build linking df
+
+## Validate link levels
+
+For each entry in the `linking_field` column of the `linking_df` I need to check that each tab has consistent naming and the same number of levels are present in each.
+
+(Another for loop that needs to get converted to a more efficient way)
+
+Ok which linking fields didn't match up
+
+```{r non_matched_linking}
+linking_df %>%
+  dplyr::filter(! all_2_in_1 | ! all_1_in_2)
+```
+
+In this case all are okay.
+
+## Secondary wrangler review process
+
+### Reconstruct experiment
+
+#### Graph diagram
+
+#### Account for every biomaterial, file, protocol entity
+
+* Are all cell suspensions in Cell Supension tab also in Sequence file tab
+* Are any donors in donor tab absent from sequencing or imaging tab
+
+
+#### Confirm files uploaded to s3
+
+
+
+```{r list_s3_files}
+file_list_df <- list_s3_files(s3_url = "s3://org-humancellatlas-upload-staging/aaaaaaaa-bbbb-cccc-dddd-acf331bf0e8f/", 
+                           user = "mshadbolt")
+
+```
+
+```{r list_ssheet_file_names}
+seq_file_names <- metadata_spreadsheet[[test_filenames$sheet_name[1]]] %>%
+  dplyr::select(dplyr::contains("file_name")) %>%
+  dplyr::pull()
+```
+
+```{r verify_files}
+check_uploaded_files(seq_file_names, file_list_df$file_name)
+```
+
+```{r}
+get_col_names(tibble_list = metadata_spreadsheet) %>%
+  dplyr::filter(stringr::str_detect(col_name, "end_bias"))
+```
+
+
+
+```{r}
+metadata_spreadsheet$`Library preparation protocol` %>% 
+  dplyr::select(library_preparation_protocol.end_bias)
+  dplyr::select(dplyr::contains("reagent")) %>% View()
+
+```
+
+
+#### check ontologies
+
+```{r}
+split_tibble <- get_col_names(metadata_spreadsheet) %>%
+  dplyr::filter(stringr::str_detect(col_name, "ontology|text")) %>%
+  dplyr::rowwise() %>%
+  dplyr::mutate(col_type = get_field_name(col_name),
+                not_field = get_not_field_name(col_name)) %>%
+  dplyr::ungroup() %>%
+  dplyr::group_by(not_field) %>%
+  dplyr::group_split()
+
+
+split_tibble[[2]]$levels <-
+purrr::map2(.x = split_tibble[[2]]$sheet_name,
+            .y = split_tibble[[2]]$col_name,
+            .f = pull_field_levels, tibble_list = metadata_spreadsheet)
+
+tidyr::unnest(split_tibble[[2]])
+
+expand_rows(split_tibble[[2]])
+
+expanded_tibble_list <- purrr::map(split_tibble, expand_rows)
+bound_tibble_list <- do.call(dplyr::bind_rows, expanded_tibble_list) 
+
+ontology_table <- bound_tibble_list %>%
+  dplyr::filter(col_type == "ontology") %>%
+  dplyr::select(-col_type) %>%
+  dplyr::rename(ontology = levels) %>%
+  dplyr::group_by(not_field) %>%
+  dplyr::mutate(rank = dplyr::row_number()) %>%
+  dplyr::left_join(bound_tibble_list %>%
+                     dplyr::filter(col_type == "ontology_label") %>%
+                     dplyr::select(-col_type, -col_name) %>%
+                     dplyr::rename(ontology_label = levels) %>%
+                     dplyr::group_by(not_field) %>%
+                     dplyr::mutate(rank = dplyr::row_number())) %>%
+  dplyr::left_join(bound_tibble_list %>%
+                     dplyr::filter(col_type == "text") %>%
+                     dplyr::select(-col_type, -col_name) %>%
+                     dplyr::rename(ontology_text = levels))
+  
+```
+
+```{r}
+get_ontologies(metadata_spreadsheet)
+```
+
+
+
+```{r}
+named_sheet_names <- ontology_field_names$sheet_name
+names(named_sheet_names) <- ontology_field_names$col_name
+purrr::map2(.x = named_sheet_names,
+            .y = ontology_field_names$col_name,
+            .f = pull_field_levels, tibble_list = metadata_spreadsheet) %>%
+  tibble::as_tibble()
+
+    dplyr::rowwise() %>%
+    dplyr::mutate(unique_entries = list(levels(factor(metadata_spreadsheet[[sheet_name]][[col_name]][which(!is.na(metadata_spreadsheet[[sheet_name]][[col_name]]))]))))
+    dplyr::mutate(col_type = get_field_name(col_name),
+                  not_field = get_not_field_name(col_name)) %>%
+    dplyr::select(-col_name) %>%
+    tidyr::spread(col_type, unique_entries)
+```
+
+
+```{r ontologies_per_tab}
+ontologies_per_tab <- get_ontologies(metadata_spreadsheet) 
+ontologies_per_tab[5,] %>%
+  dplyr::rowwise() %>%
+  tidyr::separate_rows(ontology, sep = "\\|\\|") %>%
+  tidyr::separate_rows(ontology_label, sep = "\\|\\|")
+  
+```
+
+```{r}
+
+```
+
+
+```{r vector_of_all_ontologies}
+all_ontologies <- unname(unlist(sapply(ontologies_per_tab$ontology, split_field_list)))
+all_ontologies[1:5]
+```
+
+
+```{r all_ontologies_in_HCA_ontology}
+
+
+```
+
+```{r all_ontologies_from_correct_category}
+
+```
+
+
+
 
 
 <!-- Leaving this here because I might be able to use simliar code and don't want

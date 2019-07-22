@@ -15,5 +15,4 @@ field_name
 \description{
 \code{get_field_name} gets the specific field name in the long `.`` delimited
 programmatic name. It splits the field by the `.` and returns the last string.
-(not exported)
 }

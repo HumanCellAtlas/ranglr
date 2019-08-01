@@ -1,0 +1,68 @@
+sheet_name,col_name,ontology_module,api_ontology,allowed_prefix
+Cell line,cell_line.cell_cycle.ontology,cell_cycle_ontology,hcao,GO
+Cell line,cell_line.cell_morphology.cell_size_unit.ontology,length_unit_ontology,efo,UO
+Cell line,cell_line.cell_type.ontology,cell_type_ontology,hcao,CL
+Cell line,cell_line.disease.ontology,disease_ontology,mondo;efo,MONDO;PATO
+Cell line,cell_line.genus_species.ontology,species_ontology,efo,NCBITaxon
+Cell line,cell_line.model_organ.ontology,organ_ontology,hcao,UBERON
+Cell line,cell_line.timecourse.unit.ontology,time_unit_ontology,efo,UO
+Cell line,cell_line.tissue.ontology,organ_part_ontology,hcao,UBERON
+Cell line,process.length_of_time_unit.ontology,time_unit_ontology,efo,UO
+Cell line,process.type.ontology,process_type_ontology,efo,EFO
+Cell suspension,cell_suspension.cell_morphology.cell_size_unit.ontology,length_unit_ontology,efo,UO
+Cell suspension,cell_suspension.genus_species.ontology,species_ontology,efo,NCBITaxon
+Cell suspension,cell_suspension.selected_cell_types.ontology,,hcao,CL
+Cell suspension,cell_suspension.timecourse.unit.ontology,time_unit_ontology,efo,UO
+Cell suspension,process.length_of_time_unit.ontology,time_unit_ontology,efo,UO
+Cell suspension,process.type.ontology,process_type_ontology,efo,EFO
+Collection protocol,collection_protocol.method.ontology,process_type_ontology,efo,EFO
+Dissociation protocol,dissociation_protocol.method.ontology,process_type_ontology,efo,EFO
+Donor organism,donor_organism.development_stage.ontology,development_stage_ontology,efo;hcao,EFO;HsapDv;UBERON
+Donor organism,donor_organism.diseases.ontology,disease_ontology,mondo;efo,MONDO;PATO
+Donor organism,donor_organism.genus_species.ontology,species_ontology,efo,NCBITaxon
+Donor organism,donor_organism.gestational_age_unit.ontology,time_unit_ontology,efo,UO
+Donor organism,donor_organism.height_unit.ontology,length_unit_ontology,efo,UO
+Donor organism,donor_organism.human_specific.ethnicity.ontology,ethnicity_ontology,hancestro,HANCESTRO
+Donor organism,donor_organism.mouse_specific.strain.ontology,strain_ontology,efo,EFO
+Donor organism,donor_organism.organism_age_unit.ontology,time_unit_ontology,efo,UO
+Donor organism,donor_organism.timecourse.unit.ontology,time_unit_ontology,efo,UO
+Donor organism,donor_organism.weight_unit.ontology,mass_unit_ontology,efo,UO
+Donor organism,process.length_of_time_unit.ontology,time_unit_ontology,efo,UO
+Donor organism,process.type.ontology,process_type_ontology,efo,EFO
+Enrichment protocol,enrichment_protocol.method.ontology,process_type_ontology,efo,EFO
+Image file,image_file.file_core.content_description.ontology,file_content_ontology,edam,DATA
+Image file,process.length_of_time_unit.ontology,time_unit_ontology,efo,UO
+Image file,process.type.ontology,process_type_ontology,efo,EFO
+Imaged specimen,imaged_specimen.internal_anatomical_structures.ontology,,hcao,UBERON
+Imaged specimen,process.length_of_time_unit.ontology,time_unit_ontology,efo,UO
+Imaged specimen,process.type.ontology,process_type_ontology,efo,EFO
+Imaging preparation protocol,imaging_preparation_protocol.post_final_slicing_interval_unit.ontology,time_unit_ontology,efo,UO
+Imaging preparation protocol,imaging_preparation_protocol.post_resection_interval_unit.ontology,time_unit_ontology,efo,UO
+Imaging preparation protocol,imaging_preparation_protocol.pre_final_slice_preservation_method.storage_time_unit.ontology,time_unit_ontology,efo,UO
+Imaging protocol,imaging_protocol.microscopy_technique.ontology,microscopy_ontology,hcao,FBbi
+Imaging protocol - Probe,imaging_protocol.probe.assay_type.ontology,process_type_ontology,efo,EFO
+Imaging protocol - Probe,imaging_protocol.probe.subcellular_structure.ontology,cellular_component_ontology,hcao,GO
+Library preparation protocol,library_preparation_protocol.cdna_library_amplification_method.ontology,library_amplification_ontology,efo,EFO;OBI
+Library preparation protocol,library_preparation_protocol.input_nucleic_acid_molecule.ontology,biological_macromolecule_ontology,efo;hcao,EFO;CHEBI;OBI
+Library preparation protocol,library_preparation_protocol.library_construction_method.ontology,library_construction_ontology,efo,OBI
+Library preparation protocol,library_preparation_protocol.library_preamplification_method.ontology,library_amplification_ontology,efo,EFO;OBI
+Organoid,organoid.age_unit.ontology,time_unit_ontology,efo,UO
+Organoid,organoid.genus_species.ontology,species_ontology,efo,NCBITaxon
+Organoid,organoid.model_organ_part.ontology,organ_part_ontology,hcao,UBERON
+Organoid,organoid.model_organ.ontology,organ_ontology,hcao,UBERON
+Organoid,organoid.size_unit.ontology,length_unit_ontology,efo,UO
+Organoid,process.length_of_time_unit.ontology,time_unit_ontology,efo,UO
+Organoid,process.type.ontology,process_type_ontology,efo,EFO
+Project - Contributors,project.contributors.project_role.ontology,contributor_role_ontology,efo,EFO
+Sequence file,process.length_of_time_unit.ontology,time_unit_ontology,efo,UO
+Sequence file,process.type.ontology,process_type_ontology,efo,EFO
+Sequence file,sequence_file.file_core.content_description.ontology,file_content_ontology,edam,DATA
+Sequencing protocol,sequencing_protocol.instrument_manufacturer_model.ontology,instrument_ontology,efo,EFO
+Sequencing protocol,sequencing_protocol.method.ontology,sequencing_ontology,efo,EFO
+Specimen from organism,process.length_of_time_unit.ontology,time_unit_ontology,efo,UO
+Specimen from organism,process.type.ontology,process_type_ontology,efo,EFO
+Specimen from organism,specimen_from_organism.diseases.ontology,disease_ontology,mondo;efo,MONDO;EFO
+Specimen from organism,specimen_from_organism.genus_species.ontology,species_ontology,efo,NCBITaxon
+Specimen from organism,specimen_from_organism.organ_parts.ontology,organ_part_ontology,hcao,UBERON
+Specimen from organism,specimen_from_organism.organ.ontology,organ_ontology,hcao,UBERON
+Specimen from organism,specimen_from_organism.preservation_storage.storage_time_unit.ontology,time_unit_ontology,efo,UO

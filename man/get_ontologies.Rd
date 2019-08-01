@@ -15,5 +15,6 @@ ontology_label
 }
 \description{
 \code{get_ontologies} goes through the spreadsheet to mine out all the
-ontology terms so that they can be validated.
+ontology terms so that a wrangler can quickly look at the list of ontologies
+for a sanity check.
 }

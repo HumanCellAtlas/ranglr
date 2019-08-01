@@ -1,0 +1,25 @@
+---
+title: "set_up_a_project"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{set_up_a_project}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(ranglr)
+```
+
+
+```{r create_s3}
+created_bucket <- create_s3(user = "mshadbolt", project_shorthand = "my-cool-project")
+```
+

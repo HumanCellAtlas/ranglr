@@ -149,7 +149,7 @@ get_col_names <- function(tibble_list) {
   col_names_list <- lapply(sheet_names,
                            function(x)
                              tibble::as_tibble(list("sheet_name"= x,
-                                                    "col_name" = colnames(metadata_spreadsheet[[x]]))))
+                                                    "col_name" = colnames(tibble_list[[x]]))))
   col_names_df <- do.call(dplyr::bind_rows, col_names_list)
   return(col_names_df)
 }
@@ -228,6 +228,28 @@ pull_field_levels <- function(sheet_name, field_name, tibble_list) {
   return(field_levels)
 }
 
+#' Get rows
+#'
+#' \code{get_rows} gets a set of rows from the spreadsheet by the sheet name and
+#' field name.
+#'
+#' @param tibble_list the loaded metadata spreadsheet
+#' @param sheet_name the name of sheet
+#' @param field_name a list of the programmatic names of the desired columns
+#' @return a tibble with the `field_names` given
+#' @export
+get_rows <- function(tibble_list, sheet_name, field_name){
+  field_names <- unlist(field_name)
+  requested_rows <- tibble_list[[sheet_name]] %>%
+    dplyr::select(dplyr::one_of(field_names)) %>%
+    dplyr::mutate(sheet_name = sheet_name)
+  print(get_field_name(field_name))
+  print()
+  # colnames(requested_rows) <- c(get_field_name(field_name), "sheet_name", "pre_field_name")
+  # print(colnames(requested_rows))
+  return(requested_rows)
+}
+
 #' Expand rows by field level
 #'
 #' \code{expand_rows} takes a tibble with a consistent number of nested field
@@ -263,37 +285,41 @@ split_field_list <- function(field_list) {
 #' Get ontologies
 #'
 #' \code{get_ontologies} goes through the spreadsheet to mine out all the
-#' ontology terms so that they can be validated.
+#' ontology terms so that a wrangler can quickly look at the list of ontologies
+#' for a sanity check.
 #'
 #' @param tibble_list the list of tibbles outputted from `load_spreadsheet()`
 #' @return a dataframe with sheet_name, field_name, text, ontology,
 #' ontology_label
 #' @export
 get_ontologies <- function(tibble_list) {
-  split_tibble <- get_col_names(tibble_list) %>%
-    dplyr::filter(stringr::str_detect(col_name, "ontology|text")) %>%
-    dplyr::rowwise() %>%
-    dplyr::mutate(col_type = get_field_name(col_name),
-                  not_field = get_not_field_name(col_name)) %>%
-    dplyr::ungroup() %>%
-    dplyr::group_by(not_field) %>%
-    dplyr::group_split()
 
-  expanded_tibble_list <- purrr::map(split_tibble, expand_rows)
-  bound_tibble <- do.call(dplyr::bind_rows, expanded_tibble_list)
 
-  ontology_table <- bound_tibble %>%
-    dplyr::filter(col_type == "ontology") %>%
-    dplyr::select(-col_type) %>%
-    dplyr::rename(ontology = levels) %>%
-    dplyr::left_join(bound_tibble %>%
-                       dplyr::filter(col_type == "ontology_label") %>%
-                       dplyr::select(-col_type, -col_name) %>%
-                       dplyr::rename(ontology_label = levels)) %>%
-    dplyr::left_join(bound_tibble %>%
-                       dplyr::filter(col_type == "text") %>%
-                       dplyr::select(-col_type, -col_name) %>%
-                       dplyr::rename(ontology_text = levels))
+
+  # split_tibble <- get_col_names(tibble_list) %>%
+  #   dplyr::filter(stringr::str_detect(col_name, "ontology|text")) %>%
+  #   dplyr::rowwise() %>%
+  #   dplyr::mutate(col_type = get_field_name(col_name),
+  #                 not_field = get_not_field_name(col_name)) %>%
+  #   dplyr::ungroup() %>%
+  #   dplyr::group_by(not_field) %>%
+  #   dplyr::group_split()
+  #
+  # expanded_tibble_list <- purrr::map(split_tibble, expand_rows)
+  # bound_tibble <- do.call(dplyr::bind_rows, expanded_tibble_list)
+  #
+  # ontology_table <- bound_tibble %>%
+  #   dplyr::filter(col_type == "ontology") %>%
+  #   dplyr::select(-col_type) %>%
+  #   dplyr::rename(ontology = levels) %>%
+  #   dplyr::left_join(bound_tibble %>%
+  #                      dplyr::filter(col_type == "ontology_label") %>%
+  #                      dplyr::select(-col_type, -col_name) %>%
+  #                      dplyr::rename(ontology_label = levels)) %>%
+  #   dplyr::left_join(bound_tibble %>%
+  #                      dplyr::filter(col_type == "text") %>%
+  #                      dplyr::select(-col_type, -col_name) %>%
+  #                      dplyr::rename(ontology_text = levels))
 
 #
 #

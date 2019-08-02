@@ -20,21 +20,51 @@ library(ranglr)
 
 Here I'll showcase useful functions when editing a projects
 
-```{r get_uuids}
-staging_submission_uuid <- "5cdbe23d64198100078914ea"
-query_existing_submission(staging_submission_uuid, 
+## Query the ingest API for uuids
+
+This can be done using the function `query_existing_submission`. The user needs to provide the submission id for the submission they want to get uuids for. At the moment the easiest place to get the `submission_id` is from the staging and prod data trackers.
+
+Prod data tracker: https://tracker.data.humancellatlas.org/
+Staging data tracker: https://tracker.staging.data.humancellatlas.org/
+
+The function returns a tibble converted from the API call JSON with many fields that can then be filtered to ones the user is interested in. The uuid itself is called `uuid.uuid`
+
+```{r get_processes_uuids_staging}
+staging_submission_id <- "5cdbe23d64198100078914ea"
+processes_df <- query_existing_submission(staging_submission_id, 
                           submission_environment = "staging", 
-                          entity_type = "biomaterials")
+                          entity_type = "processes")
+tibble::glimpse(processes_df)
+processes_df %>%
+  dplyr::select(content.process_core.process_id, uuid.uuid)
 ```
 
-```{r}
-prod_submission_uuid <- "5d3b11bc9be88c0008a9d744"
-#"f8aa201c-4ff1-45a4-890e-840d63459ca2"
-#"8d2aace1-34d6-4c6c-bc4a-3af461dd7559"
+This can be done for any of the 5 entity types, i.e. `biomaterials`, `files`, `processes`, `projects`, `protocols`.
 
-query_existing_submission(prod_submission_uuid, 
+```{r get_protocols_uuids_staging}
+protocols_df <- query_existing_submission(staging_submission_id, 
+                          submission_environment = "staging", 
+                          entity_type = "protocols")
+tibble::glimpse(protocols_df)
+protocols_df %>%
+  dplyr::select(content.protocol_core.protocol_id, content.protocol_core.protocol_name, 
+                uuid.uuid)
+```
+
+
+And you can do the same in the prod ingest api
+
+```{r get_uuids_prod}
+prod_submission_id <- "5d3b11bc9be88c0008a9d744"
+
+query_existing_submission(prod_submission_id, 
                           submission_environment = "prod", 
                           entity_type = "protocols")
 ```
 
 Can get the `Ingest Submission id` from the prod data tracker https://tracker.data.humancellatlas.org/
+
+```{r}
+httr::GET("https://api.ingest.staging.data.humancellatlas.org/submissionEnvelopes/5cdbe23d64198100078914ea/processes?size=1000", httr::timeout(360))
+```
+

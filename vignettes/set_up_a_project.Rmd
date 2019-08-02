@@ -19,7 +19,10 @@ library(ranglr)
 ```
 
 
+## Create an s3 bucket
+
 ```{r create_s3}
 created_bucket <- create_s3(user = "mshadbolt", project_shorthand = "my-cool-project")
+created_bucket
 ```
 

@@ -18,6 +18,8 @@ Imports:
     httr,
     igraph,
     jsonlite,
+    kableExtra,
+    knitr,
     magrittr,
     readr,
     readxl,

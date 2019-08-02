@@ -38,20 +38,29 @@ load_spreadsheet <- function(path) {
 #'
 #' \code{summarise_spreadsheet} provides a useful summary of the data that is
 #' currently in a spreadsheet so that a wrangler can get a quick and easy
-#' overview.
+#' overview. This function prints a nicely formatted table as well as returning
+#' the tibble from which the table was derived.
 #'
 #' @param tibble_list a list of tibbles outputted by \code{load_spreadsheet}
 #' @return a tibble with summary counts
 #' @export
 summarise_spreadsheet <- function(tibble_list) {
-  print("Project Accessions")
   accession_columns <- colnames(tibble_list$Project %>%
                                   dplyr::select(dplyr::contains("accession")))
-  print(accession_columns)
-  tibble_list$Project %>%
+  summary_df <-tibble_list$Project %>%
     dplyr::mutate_at(dplyr::vars(dplyr::contains("accession")),
-                     count_accessions) %>%
+                     count_accessions)
+  summary_df$bundle_count <- count_bundles(tibble_list)
+  colnames(summary_df) <- sapply(colnames(summary_df), get_field_name)
+  summary_df <- summary_df %>%
+    dplyr::select(project_short_name, bundle_count, dplyr::contains("accessions"))
+  summary_df %>%
+    t() %>%
+    knitr::kable() %>%
+    kableExtra::kable_styling() %>%
     print()
+
+  return(summary_df)
 }
 
 #' Count accessions
@@ -68,6 +77,20 @@ count_accessions <- function(acc_string) {
     return(length(stringr::str_split(acc_string, pattern = "\\|\\|",
                                      simplify = T)))
   }
+}
+
+#' Count bundles
+#'
+#' \code{count_bundles} estimates the number of bundles based on the number of
+#' levels in the `process_id` field in the `Sequence file` tab of the
+#' spreadsheet.
+#'
+#' @param tibble_list a list of tibbles outputted by \code{load_spreadsheet}
+#' @export
+count_bundles <- function(tibble_list){
+  lib_preps <- tibble_list$`Sequence file`$process.process_core.process_id
+  bundle_count <- length(levels(factor(lib_preps)))
+  return(bundle_count)
 }
 
 #' Get linking fields
@@ -173,11 +196,10 @@ get_file_name_fields <- function(tibble_list){
 #' Get filenames in the spreadsheet
 #'
 #' \code{get_file_names} gets a list of the filenames in the spreadsheet. By
-#' default returns all filenames in the spreadsheet (coming soon: user can optionally
-#' specify a particular file_name field or vector of fields).
+#' default returns all filenames in the spreadsheet.
 #'
 #' @param tibble_list outputted from \code{load_spreadsheet}
-#' @param field
+# @param field specific file name field to query
 #' @return a vector of string filenames
 #' @export
 # TODO: add functionality to recognise if one of the fields is empty

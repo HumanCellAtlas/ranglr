@@ -16,10 +16,10 @@ create_s3(user, project_shorthand,
 \item{upload_env_name}{the name of the environment, i.e. staging, dev,
 integration}
 
-\item{dataset_name}{the name of the dataset}
+\item{project_shortand}{the `-` delimited name of the dataset e.g. my-cool-project}
 
-\item{submission_count}{by default 0 but can be changed if it is a subsequent
-submission for the same project}
+\item{submission_count}{by default 0 but can be changed if it is a bucket for
+a subsequent submission for the same project}
 }
 \value{
 the url of the s3 bucket of the form \code{s3://org-humancellatlas-upload-staging/aaaaaaaa-bbbb-cccc-dddd-e012345f6789/}

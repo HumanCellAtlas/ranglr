@@ -15,5 +15,6 @@ a tibble with summary counts
 \description{
 \code{summarise_spreadsheet} provides a useful summary of the data that is
 currently in a spreadsheet so that a wrangler can get a quick and easy
-overview.
+overview. This function prints a nicely formatted table as well as returning
+the tibble from which the table was derived.
 }

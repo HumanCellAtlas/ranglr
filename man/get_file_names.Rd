@@ -14,6 +14,5 @@ a vector of string filenames
 }
 \description{
 \code{get_file_names} gets a list of the filenames in the spreadsheet. By
-default returns all filenames in the spreadsheet (coming soon: user can optionally
-specify a particular file_name field or vector of fields).
+default returns all filenames in the spreadsheet.
 }

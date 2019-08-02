@@ -1,5 +1,5 @@
 ---
-title: "validate-a-spreadsheet"
+title: "Validate a spreadsheet"
 author: "Marion Shadbolt"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
 
 # Goals
 
-This document aims to summarise some of the functionality of the `ranglr` R pacakge. The package aims to provide functions and tools to help primary wranglers wrangle their data and secondary wranglers review a dataset.
+This document aims to display some of the functionality of the `ranglr` R pacakge. The package aims to provide functions and tools to help primary wranglers wrangle their data and secondary wranglers review a dataset.
 
 ```{r setup}
 library(ranglr)
@@ -28,54 +28,53 @@ library(ranglr)
 
 ## Load a spreadsheet
 
+This function loads a spreadsheet into R as a list of tibble objects. The list is named with the names of the tabs of the spreadsheet. This function discards the supplementary files tab if it is empty as well as the `Schemas` tab if it is present. It discards the top rows and retains the programmatic name as the names of the columns within each tab. The user just needs to provide the path to the spreadsheet they want to load.
+
 ```{r load_spreadsheet}
-metadata_spreadsheet <- load_spreadsheet("../../../../Google Drive File Stream/My Drive/Brokering/PROJECTS - IN PROGRESS/GSE95459 - GSE114374/hca-metadata-spreadsheet-GSE95459-GSE114374-colon.xlsx")
+metadata_spreadsheet <- load_spreadsheet("../../../../Google Drive File Stream/My Drive/Brokering/PROJECTS - FINISHED/GSE95459 - GSE114374/hca-metadata-spreadsheet-GSE95459-GSE114374-colon.xlsx")
 names(metadata_spreadsheet)
 ```
 
 ## Summarise a spreadsheet
 
-I think it would be good to see an overall summary of the spreadsheet. Functionality to include:
+I think it would be good to see an overall summary of the spreadsheet. This function is still under development so any ideas for additional summary stats are most welcome. Current functionality:
+* number of expected bundles
 * number of accessions
-* 
 
 ```{r summarise_spreadsheet}
-summarise_spreadsheet(metadata_spreadsheet)
+summary <- summarise_spreadsheet(metadata_spreadsheet)
 ```
 
 ## Build a dataframe with list of all column names found in each sheet
 
+Returns a tibble with two columns, `sheet_name` and `col_name`.
+
+```{r get_col_names}
+get_col_names(metadata_spreadsheet)
+```
+
+
+## Get a list of all filenames
+
+This is useful if you want to compare the files present in a spreadsheet to those present in the S3 bucket for a project.
 
 ```{r get_file_names}
 files <- get_file_names(metadata_spreadsheet)
+files[1:5]
 ```
 
 ## Build a linking data frame
 
-Going to resort to a nested loop but I'm sure there is a better way.
+Creates a dataframe that shows where there is a linking field between two tabs in a spreadsheet.
 
 ```{r linking_df}
 linking_df <- build_linking_df(metadata_spreadsheet)
+linking_df
 ```
-
-## Build type module lookup table
-
-Need to make a lookup table to look up all column names by a sheet name and vice versa.
-
-```{r lookup_columns_by_sheet}
-type_module_lookup <- build_type_module_lookup(metadata_spreadsheet)
-```
-
-incorporate this into the build linking df code so that there are explicit sheet
-names
-
-Now done automatically within build linking df
 
 ## Validate link levels
 
 For each entry in the `linking_field` column of the `linking_df` I need to check that each tab has consistent naming and the same number of levels are present in each.
-
-(Another for loop that needs to get converted to a more efficient way)
 
 Ok which linking fields didn't match up
 
@@ -93,7 +92,11 @@ In this case all are okay.
 
 #### Graph diagram
 
+Currently thinking of how to implement this.
+
 #### Confirm files uploaded to s3
+
+If you get the warning "Expected 4 pieces. Missing pieces filled with `NA` in 1 rows." this can be safely ignored.
 
 ```{r list_s3_files}
 file_list_df <- list_s3_files(s3_url = "s3://org-humancellatlas-upload-staging/aaaaaaaa-bbbb-cccc-dddd-acf331bf0e8f/", 
@@ -101,27 +104,24 @@ file_list_df <- list_s3_files(s3_url = "s3://org-humancellatlas-upload-staging/a
 
 ```
 
-```{r list_ssheet_file_names}
-seq_file_names <- metadata_spreadsheet[[test_filenames$sheet_name[1]]] %>%
-  dplyr::select(dplyr::contains("file_name")) %>%
-  dplyr::pull()
-```
+`check_uploaded_files` ensures all and only the files in the spreadsheet are in the s3 bucket and prints the results of the test to console.
 
 ```{r verify_files}
-check_uploaded_files(seq_file_names, file_list_df$file_name)
+check_uploaded_files(files, file_list_df$file_name)
 ```
 
-```{r}
+Example of using the `get_col_names` function if you don't remember which tab a certain field is in.
+
+```{r get_col_names_example}
 get_col_names(tibble_list = metadata_spreadsheet) %>%
   dplyr::filter(stringr::str_detect(col_name, "end_bias"))
 ```
 
-
+Example of how to look at certain columns within a spreasheet.
 
 ```{r}
 metadata_spreadsheet$`Library preparation protocol` %>% 
-  dplyr::select(library_preparation_protocol.end_bias)
-  dplyr::select(dplyr::contains("reagent")) %>% View()
+  dplyr::select(dplyr::contains("ontology"))
 
 ```
 

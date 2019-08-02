@@ -47,12 +47,12 @@ list_s3_files <- function(s3_url, user) {
 #' "STAGING_UPLOAD_API_KEY"
 #'
 #' @param user your username
-#' @param dataset_name the name of the dataset
+#' @param project_shortand the `-` delimited name of the dataset e.g. my-cool-project
 #' @param upload_api_key the upload api string
 #' @param upload_env_name the name of the environment, i.e. staging, dev,
 #' integration
-#' @param submission_count by default 0 but can be changed if it is a subsequent
-#' submission for the same project
+#' @param submission_count by default 0 but can be changed if it is a bucket for
+#'  a subsequent submission for the same project
 #' @return the url of the s3 bucket of the form \code{s3://org-humancellatlas-upload-staging/aaaaaaaa-bbbb-cccc-dddd-e012345f6789/}
 #' @examples
 #' create_s3("mshadbolt", "my-cool-project")

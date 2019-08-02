@@ -30,5 +30,5 @@ assumes you have the staging api key saved in your .Renviron file and called
 "STAGING_UPLOAD_API_KEY"
 }
 \examples{
-create_s3("mshadbolt", "my-cool-project")
+create_s3("FirstInitialLastName", "my-cool-project")
 }

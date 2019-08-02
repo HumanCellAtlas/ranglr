@@ -18,7 +18,7 @@ ssh_ec2 <- function(username, ec2_url="tool.staging.data.humancellatlas.org") {
 #' \code{list_s3_files} lists the s3 files in a given s3 bucket.
 #'
 #' @param s3_url the url of the s3 bucket, e.g. s3://org-humancellatlas-upload-staging/aaaaaaaa-bbbb-cccc-dddd...
-#' @param user the user's username e.g. `mshadbolt``
+#' @param user the user's username usually `FirstInitialLastName`
 #' @return a tibble of files in bucket
 #' @export
 # TODO: write code to ensure it doesn't error or at least hide the error message
@@ -55,7 +55,7 @@ list_s3_files <- function(s3_url, user) {
 #'  a subsequent submission for the same project
 #' @return the url of the s3 bucket of the form \code{s3://org-humancellatlas-upload-staging/aaaaaaaa-bbbb-cccc-dddd-e012345f6789/}
 #' @examples
-#' create_s3("mshadbolt", "my-cool-project")
+#' create_s3("FirstInitialLastName", "my-cool-project")
 #' @export
 create_s3 <- function(user, project_shorthand,
                       upload_api_key=Sys.getenv("STAGING_UPLOAD_API_KEY"),

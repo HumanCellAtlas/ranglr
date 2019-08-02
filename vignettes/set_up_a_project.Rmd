@@ -1,5 +1,7 @@
 ---
-title: "set_up_a_project"
+title: "Set up a project"
+author: "Marion Shadbolt"
+date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{set_up_a_project}
@@ -20,6 +22,9 @@ library(ranglr)
 
 
 ## Create an s3 bucket
+
+By default, this function assumes that you have the upload API key saved in your `.Renviron` file as `STAGING_UPLOAD_API-KEY`. Or you can supply the upload api key to the `upload_api_key` argument. It then automatically SSHs into the ec2 and creates the bucket by running the `create_upload_area.py` script.
+
 
 ```{r create_s3}
 created_bucket <- create_s3(user = "mshadbolt", project_shorthand = "my-cool-project")

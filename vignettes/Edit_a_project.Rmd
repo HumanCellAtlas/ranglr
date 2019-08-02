@@ -1,5 +1,7 @@
 ---
-title: "Edit_a_project"
+title: "Edit a project"
+author: "Marion Shadbolt"
+date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Edit_a_project}

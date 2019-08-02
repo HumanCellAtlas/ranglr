@@ -9,7 +9,7 @@ list_s3_files(s3_url, user)
 \arguments{
 \item{s3_url}{the url of the s3 bucket, e.g. s3://org-humancellatlas-upload-staging/aaaaaaaa-bbbb-cccc-dddd...}
 
-\item{user}{the user's username e.g. `mshadbolt``}
+\item{user}{the user's username usually `FirstInitialLastName`}
 }
 \value{
 a tibble of files in bucket

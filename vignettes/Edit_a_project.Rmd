@@ -66,7 +66,3 @@ query_existing_submission(prod_submission_id,
 
 Can get the `Ingest Submission id` from the prod data tracker https://tracker.data.humancellatlas.org/
 
-```{r}
-httr::GET("https://api.ingest.staging.data.humancellatlas.org/submissionEnvelopes/5cdbe23d64198100078914ea/processes?size=1000", httr::timeout(360))
-```
-

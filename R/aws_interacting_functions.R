@@ -7,6 +7,7 @@
 #' @param username string
 #' @param ec2_url ec2 url, `tool.staging.data.humancellatlas.org` by default
 #' @return connection ssh connection object
+#' @export
 ssh_ec2 <- function(username, ec2_url="tool.staging.data.humancellatlas.org") {
   user_url <- paste0(username, "@", ec2_url)
   connection <- ssh::ssh_connect(user_url)
@@ -47,11 +48,11 @@ list_s3_files <- function(s3_url, user) {
 #' "STAGING_UPLOAD_API_KEY"
 #'
 #' @param user your username
-#' @param project_shortand the `-` delimited name of the dataset e.g. my-cool-project
+#' @param project_shorthand the `-` delimited name of the dataset e.g. my-cool-project
 #' @param upload_api_key the upload api string
 #' @param upload_env_name the name of the environment, i.e. staging, dev,
 #' integration
-#' @param submission_count by default 0 but can be changed if it is a bucket for
+#' @param submission_n by default 0 but can be changed if it is a bucket for
 #'  a subsequent submission for the same project
 #' @return the url of the s3 bucket of the form \code{s3://org-humancellatlas-upload-staging/aaaaaaaa-bbbb-cccc-dddd-e012345f6789/}
 #' @examples
@@ -74,4 +75,25 @@ create_s3 <- function(user, project_shorthand,
   ssh::ssh_disconnect(this_connection)
   s3_bucket_url <- stringr::str_split(rawToChar(out$stdout), "\n", simplify = T)[,5]
   return(s3_bucket_url)
+}
+
+#' Copy s3 files between HCA s3 buckets
+#'
+#' \code{copy_s3} copies files between two HCA s3 buckets. It will not work for
+#' buckets outside the HCA
+#'
+#' @param{source_s3} the url of the s3 where the files to be copied are
+#' @param{dest_s3} the url of the s3 where you want the files to go
+#' @param{user} your username
+#' @export
+copy_s3 <- function(source_s3, dest_s3, user){
+  this_connection <- ssh_ec2(username = user)
+  select_command <- paste0("hca upload select ", dest_s3)
+  upload_command <- paste0("hca upload files ", source_s3)
+  out_select <-ssh::ssh_exec_internal(this_connection,
+                         command = select_command)
+  out_upload <- ssh::ssh_exec_internal(this_connection,
+                         command = upload_command)
+  ssh::ssh_disconnect(this_connection)
+  return(list(out_select, out_upload))
 }

@@ -11,14 +11,14 @@ create_s3(user, project_shorthand,
 \arguments{
 \item{user}{your username}
 
+\item{project_shorthand}{the `-` delimited name of the dataset e.g. my-cool-project}
+
 \item{upload_api_key}{the upload api string}
 
 \item{upload_env_name}{the name of the environment, i.e. staging, dev,
 integration}
 
-\item{project_shortand}{the `-` delimited name of the dataset e.g. my-cool-project}
-
-\item{submission_count}{by default 0 but can be changed if it is a bucket for
+\item{submission_n}{by default 0 but can be changed if it is a bucket for
 a subsequent submission for the same project}
 }
 \value{

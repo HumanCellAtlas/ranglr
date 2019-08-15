@@ -4,10 +4,12 @@
 \alias{expand_rows}
 \title{Expand rows by field level}
 \usage{
-expand_rows(split_tibble)
+expand_rows(split_tibble, tibble_list)
 }
 \arguments{
 \item{split_tibble}{a tibble with consistent field levels}
+
+\item{tibble_list}{the tibble imported with \code{load_spreadsheet}}
 }
 \value{
 a tibble with expanded rows

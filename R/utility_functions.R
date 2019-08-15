@@ -205,7 +205,7 @@ get_file_name_fields <- function(tibble_list){
 # TODO: add functionality to recognise if one of the fields is empty
 # TODO: add optional param to specify field or fields
 get_file_names <- function(tibble_list, field = NULL) {
-  file_name_fields <- get_file_name_fields(metadata_spreadsheet)
+  file_name_fields <- get_file_name_fields(tibble_list)
   if (!is.null(field)){
     file_name_fields <- file_name_fields %>%
       filter(col_name %in% field)
@@ -213,7 +213,7 @@ get_file_names <- function(tibble_list, field = NULL) {
   file_names <- purrr::map2(.x = file_name_fields$sheet_name,
                             .y = file_name_fields$col_name,
                             .f = pull_field,
-                            tibble_list = metadata_spreadsheet) %>%
+                            tibble_list = tibble_list) %>%
     unlist()
   return(file_names)
 }
@@ -278,13 +278,14 @@ get_rows <- function(tibble_list, sheet_name, field_name){
 #' levels and expands (unnests) the rows.
 #'
 #' @param split_tibble a tibble with consistent field levels
+#' @param tibble_list the tibble imported with \code{load_spreadsheet}
 #' @return a tibble with expanded rows
 #' @export
-expand_rows <- function(split_tibble) {
+expand_rows <- function(split_tibble, tibble_list) {
   split_tibble$levels <-
     purrr::map2(.x = split_tibble$sheet_name,
                 .y = split_tibble$col_name,
-                .f = pull_field_levels, tibble_list = metadata_spreadsheet)
+                .f = pull_field_levels, tibble_list = tibble_list)
   expanded_tibble <- tidyr::unnest(split_tibble)
     return(expanded_tibble)
 }

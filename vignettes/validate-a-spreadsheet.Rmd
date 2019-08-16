@@ -22,6 +22,7 @@ This document aims to display some of the functionality of the `ranglr` R pacakg
 
 ```{r setup}
 library(ranglr)
+library(magrittr)
 ```
 
 # General Functionality
@@ -117,7 +118,7 @@ get_col_names(tibble_list = metadata_spreadsheet) %>%
   dplyr::filter(stringr::str_detect(col_name, "end_bias"))
 ```
 
-Example of how to look at certain columns within a spreasheet.
+Example of how to look at certain columns within a spreadsheet. You could decide you want to see all the ontology fields within the `Library preparation protocol` sheet
 
 ```{r}
 metadata_spreadsheet$`Library preparation protocol` %>% 
@@ -274,7 +275,7 @@ ontologies
 ```
 
 
-### testing out ols api
+### Testing out ols api
 
 ```{r}
 test_api <- httr::GET("https://ontology.staging.data.humancellatlas.org/api/ontologies/hcao/terms?obo_id=UO:0000008")
@@ -283,6 +284,7 @@ test_api$status_code
 test_api <- httr::GET("https://ontology.staging.data.humancellatlas.org/api/ontologies/uberon/terms?obo_id=UBERON:0000465")
 
 test_api <- query_hca_ontology_term("EFO:0008995", "hcao")
+test_api <- query_hca_ontology_term("EFO:0008995", "efo")
 test_api <- query_hca_ontology_term("HANCESTRO:0005", "hancestro")
 test_api <- query_hca_ontology_term("MONDO:0000001", "mondo")
 test_api <- query_hca_ontology_term("UBERON:0000465", "hcao")

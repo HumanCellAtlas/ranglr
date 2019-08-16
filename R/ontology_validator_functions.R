@@ -14,6 +14,7 @@
 #' @param ontology the name of the ontology to query
 #' @param base_url the base url by default set to \code{https://ontology.staging.data.humancellatlas.org/api/ontologies}
 #' @return a dataframe with api results
+#' @export
 # TODO: this probably isn't required so put on the backburner
 query_hca_ontology_term <- function(ontology_term, ontology,
                                     base_url="https://ontology.staging.data.humancellatlas.org/api/ontologies") {

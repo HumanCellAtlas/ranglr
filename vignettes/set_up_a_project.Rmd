@@ -25,8 +25,7 @@ library(ranglr)
 
 By default, this function assumes that you have the upload API key saved in your `.Renviron` file as `STAGING_UPLOAD_API-KEY`. Or you can supply the upload api key to the `upload_api_key` argument. It then automatically SSHs into the ec2 and creates the bucket by running the `create_upload_area.py` script.
 
-
-```{r create_s3}
+```{r create_s3, eval=F}
 created_bucket <- create_s3(user = "mshadbolt", project_shorthand = "my-cool-project")
 created_bucket
 ```

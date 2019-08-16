@@ -89,7 +89,7 @@ create_s3 <- function(user, project_shorthand,
 copy_s3 <- function(source_s3, dest_s3, user){
   this_connection <- ssh_ec2(username = user)
   select_command <- paste0("hca upload select ", dest_s3)
-  upload_command <- paste0("hca upload files ", source_s3)
+  upload_command <- paste0("hca upload files -s true ", source_s3)
   out_select <-ssh::ssh_exec_internal(this_connection,
                          command = select_command)
   out_upload <- ssh::ssh_exec_internal(this_connection,

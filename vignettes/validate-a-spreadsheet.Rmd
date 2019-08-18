@@ -127,137 +127,33 @@ metadata_spreadsheet$`Library preparation protocol` %>%
 ```
 
 
-#### check ontologies
+#### Check ontologies
 
 Trying to work on better functionality but for now will just get a list of ontologies that we can do basic checks for vailidity
 
 ```{r}
 ontology_col_names <- get_col_names(metadata_spreadsheet) %>%
-  dplyr::filter(stringr::str_detect(col_name, "ontology|text")) %>%
+  dplyr::filter(stringr::str_detect(col_name, "ontology$")) %>%
   dplyr::rowwise() %>%
-  dplyr::mutate(not_field = get_not_field_name(col_name),
-                field_name = get_field_name(col_name)) %>%
-  dplyr::select(sheet_name, not_field, field_name) %>%
-  dplyr::ungroup() %>%
-  dplyr::group_nest(sheet_name, not_field, .key="field_names")
+  dplyr::mutate(not_field = get_not_field_name(col_name)) %>%
+  dplyr::select(sheet_name, not_field) %>%
+  dplyr::ungroup() 
 
 ontology_col_names
-
 ```
 
+Check a specific ontology field
 
-```{r}
-ontologies <- purrr::map2(.x = ontology_col_names$sheet_name,
-            .y=ontology_col_names$col_name,
-            pull_field_levels, tibble_list=metadata_spreadsheet) %>%
-  unlist()
-
-sort(unique(ontologies))
+```{r tally_one_ontology}
+tally_ontology(metadata_spreadsheet, "cell_suspension.genus_species",
+               "Cell suspension")
 ```
 
-```{r}
-metadata_spreadsheet[[ontology_col_names$sheet_name[1]]] %>%
-  dplyr::select(dplyr::one_of(ontology_col_names$col_name))
+Get tallies of all ontologies in a spreadsheet
+
+```{r tally_all_ontologies}
+all_ontologies <- get_ontologies(metadata_spreadsheet)
 ```
-
-
-```{r}
-test <- purrr::map2(.x = ontology_col_names$sheet_name,
-                    .y = ontology_col_names$col_name,
-                    get_rows, tibble_list = metadata_spreadsheet)
-
-```
-
-
-
-```{r}
-split_tibble <- get_col_names(metadata_spreadsheet) %>%
-  dplyr::filter(stringr::str_detect(col_name, "ontology|text")) %>%
-  dplyr::rowwise() %>%
-  dplyr::mutate(col_type = get_field_name(col_name),
-                not_field = get_not_field_name(col_name)) %>%
-  dplyr::ungroup() %>%
-  dplyr::group_by(not_field) %>%
-  dplyr::group_split()
-
-
-split_tibble[[2]]$levels <-
-purrr::map2(.x = split_tibble[[2]]$sheet_name,
-            .y = split_tibble[[2]]$col_name,
-            .f = pull_field_levels, tibble_list = metadata_spreadsheet)
-
-tidyr::unnest(split_tibble[[2]])
-
-expand_rows(split_tibble[[2]])
-
-expanded_tibble_list <- purrr::map(split_tibble, expand_rows)
-bound_tibble_list <- do.call(dplyr::bind_rows, expanded_tibble_list) 
-
-ontology_table <- bound_tibble_list %>%
-  dplyr::filter(col_type == "ontology") %>%
-  dplyr::select(-col_type) %>%
-  dplyr::rename(ontology = levels) %>%
-  dplyr::group_by(not_field) %>%
-  dplyr::mutate(rank = dplyr::row_number()) %>%
-  dplyr::left_join(bound_tibble_list %>%
-                     dplyr::filter(col_type == "ontology_label") %>%
-                     dplyr::select(-col_type, -col_name) %>%
-                     dplyr::rename(ontology_label = levels) %>%
-                     dplyr::group_by(not_field) %>%
-                     dplyr::mutate(rank = dplyr::row_number())) %>%
-  dplyr::left_join(bound_tibble_list %>%
-                     dplyr::filter(col_type == "text") %>%
-                     dplyr::select(-col_type, -col_name) %>%
-                     dplyr::rename(ontology_text = levels))
-  
-```
-
-
-
-
-
-```{r}
-get_ontologies(metadata_spreadsheet)
-```
-
-
-
-```{r}
-named_sheet_names <- ontology_field_names$sheet_name
-names(named_sheet_names) <- ontology_field_names$col_name
-purrr::map2(.x = named_sheet_names,
-            .y = ontology_field_names$col_name,
-            .f = pull_field_levels, tibble_list = metadata_spreadsheet) %>%
-  tibble::as_tibble()
-
-    dplyr::rowwise() %>%
-    dplyr::mutate(unique_entries = list(levels(factor(metadata_spreadsheet[[sheet_name]][[col_name]][which(!is.na(metadata_spreadsheet[[sheet_name]][[col_name]]))]))))
-    dplyr::mutate(col_type = get_field_name(col_name),
-                  not_field = get_not_field_name(col_name)) %>%
-    dplyr::select(-col_name) %>%
-    tidyr::spread(col_type, unique_entries)
-```
-
-
-```{r ontologies_per_tab}
-ontologies_per_tab <- get_ontologies(metadata_spreadsheet) 
-ontologies_per_tab[5,] %>%
-  dplyr::rowwise() %>%
-  tidyr::separate_rows(ontology, sep = "\\|\\|") %>%
-  tidyr::separate_rows(ontology_label, sep = "\\|\\|")
-  
-```
-
-```{r}
-
-```
-
-
-```{r vector_of_all_ontologies}
-all_ontologies <- unname(unlist(sapply(ontologies_per_tab$ontology, split_field_list)))
-all_ontologies[1:5]
-```
-
 
 Dani recommended using the ols api in order to get the most up to date versions of the ontologies.
 
@@ -270,12 +166,10 @@ Dani recommended using the ols api in order to get the most up to date versions 
 
 ```
 
-```{r}
-ontologies
-```
 
+### Look up ontologies with ols api
 
-### Testing out ols api
+Eventually I want to be able to check the ontologies in the spreadsheet using the API but this functionality is still under development
 
 ```{r}
 test_api <- httr::GET("https://ontology.staging.data.humancellatlas.org/api/ontologies/hcao/terms?obo_id=UO:0000008")
@@ -291,8 +185,6 @@ test_api <- query_hca_ontology_term("UBERON:0000465", "hcao")
 test_api <- query_hca_ontology_term("UO:0000008", "efo")
 test_api <- query_hca_ontology_term("NCBITaxon:9606", "efo")
 test_api <- query_hca_ontology_term("HsapDv:0000000", "hcao")
-HsapDv:0000000
-
 
 response <- httr::content(test_api, as = "text", encoding = "UTF-8")
 json_list <- jsonlite::fromJSON(response, flatten = TRUE)

@@ -305,6 +305,32 @@ split_field_list <- function(field_list) {
   return(split_vector)
 }
 
+#' Tally ontology use
+#'
+#' \code{tally_ontology} counts the occurrences of a particular ontology within
+#' a spreadsheet
+#' @param tibble_list list of tibbles from load_spreadsheet
+#' @param ontology_field the name of the field up to the last bit, a.k.a not field
+#' @param sheet_name name of the sheet/tab where the ontology is found
+#' @return a tibble with fields and counts of occurrences in the spreadsheet
+#' @export
+tally_ontology <- function(tibble_list, ontology_field, sheet_name) {
+  ontology_field_names <- c("text", "ontology", "ontology_label")
+  full_fields <- paste0(ontology_field, ".", ontology_field_names)
+
+  tallied <- tibble_list[[sheet_name]] %>%
+    dplyr::select(full_fields) %>%
+    dplyr::group_by_at(full_fields) %>%
+    dplyr::tally() %>%
+    dplyr::ungroup()
+  colnames(tallied) <- c(ontology_field_names, "n")
+  tallied$not_field <- ontology_field
+  tallied$sheet_name <- sheet_name
+  tallied <- tallied %>%
+    dplyr::select(sheet_name, not_field, text, ontology, ontology_label, n)
+  return(tallied)
+}
+
 #' Get ontologies
 #'
 #' \code{get_ontologies} goes through the spreadsheet to mine out all the
@@ -313,49 +339,24 @@ split_field_list <- function(field_list) {
 #'
 #' @param tibble_list the list of tibbles outputted from `load_spreadsheet()`
 #' @return a dataframe with sheet_name, field_name, text, ontology,
-#' ontology_label
+#' ontology_label and tally of occurrences in spreadsheet
 #' @export
 get_ontologies <- function(tibble_list) {
 
+  ontology_col_names <- get_col_names(tibble_list) %>%
+    dplyr::filter(stringr::str_detect(col_name, "ontology$")) %>%
+    dplyr::rowwise() %>%
+    dplyr::mutate(not_field = get_not_field_name(col_name)) %>%
+    dplyr::select(sheet_name, not_field) %>%
+    dplyr::ungroup()
 
+  tallied_ontologies_list <- apply(ontology_col_names, MARGIN = 1,
+                                   function(x) tally_ontology(tibble_list,
+                                                              x[2],
+                                                              x[1]))
 
-  # split_tibble <- get_col_names(tibble_list) %>%
-  #   dplyr::filter(stringr::str_detect(col_name, "ontology|text")) %>%
-  #   dplyr::rowwise() %>%
-  #   dplyr::mutate(col_type = get_field_name(col_name),
-  #                 not_field = get_not_field_name(col_name)) %>%
-  #   dplyr::ungroup() %>%
-  #   dplyr::group_by(not_field) %>%
-  #   dplyr::group_split()
-  #
-  # expanded_tibble_list <- purrr::map(split_tibble, expand_rows)
-  # bound_tibble <- do.call(dplyr::bind_rows, expanded_tibble_list)
-  #
-  # ontology_table <- bound_tibble %>%
-  #   dplyr::filter(col_type == "ontology") %>%
-  #   dplyr::select(-col_type) %>%
-  #   dplyr::rename(ontology = levels) %>%
-  #   dplyr::left_join(bound_tibble %>%
-  #                      dplyr::filter(col_type == "ontology_label") %>%
-  #                      dplyr::select(-col_type, -col_name) %>%
-  #                      dplyr::rename(ontology_label = levels)) %>%
-  #   dplyr::left_join(bound_tibble %>%
-  #                      dplyr::filter(col_type == "text") %>%
-  #                      dplyr::select(-col_type, -col_name) %>%
-  #                      dplyr::rename(ontology_text = levels))
-
-#
-#
-#   ontology_columns <- get_col_names(tibble_list) %>%
-#     dplyr::filter(stringr::str_detect(col_name, "ontology|text")) %>%
-#     dplyr::rowwise() %>%
-#     dplyr::mutate(unique_entries = paste0(levels(factor(tibble_list[[sheet_name]][[col_name]][which(!is.na(tibble_list[[sheet_name]][[col_name]]))])),
-#                                            collapse = "||")) %>%
-#     dplyr::mutate(col_type = get_field_name(col_name),
-#                   not_field = get_not_field_name(col_name)) %>%
-#     dplyr::select(-col_name) %>%
-#     tidyr::spread(col_type, unique_entries)
-  return(ontology_table)
+  bound_ontologies <- do.call(dplyr::bind_rows, tallied_ontologies_list)
+  return(bound_ontologies)
 }
 
 

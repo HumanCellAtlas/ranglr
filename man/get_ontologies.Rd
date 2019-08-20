@@ -11,7 +11,7 @@ get_ontologies(tibble_list)
 }
 \value{
 a dataframe with sheet_name, field_name, text, ontology,
-ontology_label
+ontology_label and tally of occurrences in spreadsheet
 }
 \description{
 \code{get_ontologies} goes through the spreadsheet to mine out all the

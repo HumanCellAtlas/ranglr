@@ -1,10 +1,14 @@
 ---
-title: "Validate a spreadsheet"
+title: "Ranglr walkthrough"
 author: "Marion Shadbolt"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+output: 
+  rmarkdown::html_vignette:
+    keep_md: true
+    toc: true
+    toc_depth: 3
 vignette: >
-  %\VignetteIndexEntry{validate-a-spreadsheet}
+  %\VignetteIndexEntry{Ranglr walkthrough}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -27,12 +31,21 @@ library(magrittr)
 
 # General Functionality
 
+If you ever need help with a function the `?` is your friend.
+
+```{r function_help}
+?load_spreadsheet()
+```
+
+
 ## Load a spreadsheet
 
 This function loads a spreadsheet into R as a list of tibble objects. The list is named with the names of the tabs of the spreadsheet. This function discards the supplementary files tab if it is empty as well as the `Schemas` tab if it is present. It discards the top rows and retains the programmatic name as the names of the columns within each tab. The user just needs to provide the path to the spreadsheet they want to load.
 
+For this walkthrough we are using a spreadsheet that has been submitted to the datastore and is (https://data.humancellatlas.org/explore/projects/f8aa201c-4ff1-45a4-890e-840d63459ca2)[currently in the browser]. 
+
 ```{r load_spreadsheet}
-metadata_spreadsheet <- load_spreadsheet("../../../../Google Drive File Stream/My Drive/Brokering/PROJECTS - FINISHED/GSE95459 - GSE114374/hca-metadata-spreadsheet-GSE95459-GSE114374-colon.xlsx")
+metadata_spreadsheet <- load_spreadsheet("../input/hca-metadata-spreadsheet-GSE95459-GSE114374-colon.xlsx")
 names(metadata_spreadsheet)
 ```
 
@@ -54,8 +67,16 @@ Returns a tibble with two columns, `sheet_name` and `col_name`.
 get_col_names(metadata_spreadsheet)
 ```
 
+From here you could filter column names to figure out where certain fields are found for example.
 
-## Get a list of all filenames
+```{r filter_col_names}
+get_col_names(metadata_spreadsheet) %>%
+  dplyr::filter(stringr::str_detect(col_name, "biomaterial_id")) %>%
+  dplyr::arrange(col_name)
+```
+
+
+## Get a list of all filenames in a spreadsheet
 
 This is useful if you want to compare the files present in a spreadsheet to those present in the S3 bucket for a project.
 
@@ -75,12 +96,16 @@ linking_df
 
 ## Validate link levels
 
-For each entry in the `linking_field` column of the `linking_df` I need to check that each tab has consistent naming and the same number of levels are present in each.
+For each entry in the `linking_field` column of the `linking_df` we need to check that each tab has consistent naming and the same number of levels are present in each. The function `validate_link_levels` does this and adds on columns to tell the user if each field passed the test.
 
-Ok which linking fields didn't match up
+```{r add_linking_validation}
+linking_df <- validate_link_levels(linking_df)
+linking_df
+```
+
+Then the df can be filtered to see if there are any fields that are invalid.
 
 ```{r non_matched_linking}
-linking_df <- validate_link_levels(linking_df)
 linking_df %>%
   dplyr::filter(! all_2_in_1 | ! all_1_in_2)
 ```
@@ -89,11 +114,11 @@ In this case all are okay.
 
 ## Secondary wrangler review process
 
-### Reconstruct experiment
+<!-- ### Reconstruct experiment -->
 
-#### Graph diagram
+<!-- #### Graph diagram -->
 
-Currently thinking of how to implement this.
+<!-- Currently thinking of how to implement this. -->
 
 #### Confirm files uploaded to s3
 
@@ -101,7 +126,7 @@ If you get the warning "Expected 4 pieces. Missing pieces filled with `NA` in 1 
 
 ```{r list_s3_files}
 file_list_df <- list_s3_files(s3_url = "s3://org-humancellatlas-upload-staging/aaaaaaaa-bbbb-cccc-dddd-acf331bf0e8f/", 
-                           user = "mshadbolt")
+                              user = "mshadbolt")
 
 ```
 
@@ -120,96 +145,57 @@ get_col_names(tibble_list = metadata_spreadsheet) %>%
 
 Example of how to look at certain columns within a spreadsheet. You could decide you want to see all the ontology fields within the `Library preparation protocol` sheet
 
-```{r}
+```{r get_ontology_fields_in_tab}
 metadata_spreadsheet$`Library preparation protocol` %>% 
-  dplyr::select(dplyr::contains("ontology"))
-
+  dplyr::select(dplyr::contains("text"), dplyr::contains("ontology"))
 ```
 
 
 #### Check ontologies
 
-Trying to work on better functionality but for now will just get a list of ontologies that we can do basic checks for vailidity
+Get a list of all ontology fields in a spreadsheet, the `not_field` is what I call the programmatic name excluding the final `.` delimited segment..
 
 ```{r}
 ontology_col_names <- get_col_names(metadata_spreadsheet) %>%
   dplyr::filter(stringr::str_detect(col_name, "ontology$")) %>%
   dplyr::rowwise() %>%
   dplyr::mutate(not_field = get_not_field_name(col_name)) %>%
-  dplyr::select(sheet_name, not_field) %>%
   dplyr::ungroup() 
 
 ontology_col_names
 ```
 
-Check a specific ontology field
+Look at a particular ontology field to view overall which ontologies were used and how many times they were used.
 
-```{r tally_one_ontology}
+```{r tally_ontology_1}
 tally_ontology(metadata_spreadsheet, "cell_suspension.genus_species",
                "Cell suspension")
+```
+
+```{r tally_ontology_2}
+tally_ontology(metadata_spreadsheet, "specimen_from_organism.organ",
+               "Specimen from organism")
 ```
 
 Get tallies of all ontologies in a spreadsheet
 
 ```{r tally_all_ontologies}
 all_ontologies <- get_ontologies(metadata_spreadsheet)
+all_ontologies
 ```
 
-Dani recommended using the ols api in order to get the most up to date versions of the ontologies.
+#### Validate ontologies
 
-```{r all_ontologies_in_HCA_ontology}
+Query an ontology in the hcao ols API
 
-
+```{r query_ols}
+api_response <- query_hca_ontology_term("EFO:0000606", "efo")
+api_response
 ```
-
-```{r all_ontologies_from_correct_category}
-
-```
-
 
 ### Look up ontologies with ols api
 
 Eventually I want to be able to check the ontologies in the spreadsheet using the API but this functionality is still under development
-
-```{r}
-test_api <- httr::GET("https://ontology.staging.data.humancellatlas.org/api/ontologies/hcao/terms?obo_id=UO:0000008")
-test_api$status_code
-
-test_api <- httr::GET("https://ontology.staging.data.humancellatlas.org/api/ontologies/uberon/terms?obo_id=UBERON:0000465")
-
-test_api <- query_hca_ontology_term("EFO:0008995", "hcao")
-test_api <- query_hca_ontology_term("EFO:0008995", "efo")
-test_api <- query_hca_ontology_term("HANCESTRO:0005", "hancestro")
-test_api <- query_hca_ontology_term("MONDO:0000001", "mondo")
-test_api <- query_hca_ontology_term("UBERON:0000465", "hcao")
-test_api <- query_hca_ontology_term("UO:0000008", "efo")
-test_api <- query_hca_ontology_term("NCBITaxon:9606", "efo")
-test_api <- query_hca_ontology_term("HsapDv:0000000", "hcao")
-
-response <- httr::content(test_api, as = "text", encoding = "UTF-8")
-json_list <- jsonlite::fromJSON(response, flatten = TRUE)
-
-json_list$'_embedded'%>% 
-  unlist() %>% 
-  t() %>% 
-  tibble::as_tibble() %>%
-  dplyr::select(terms.obo_id, terms.label, terms.is_obsolete, terms.description)
-```
-
-Need a lookup table to know which ontologies are allowable for each ontology field
-
-```{r}
-all_fields_spreadsheet <- load_spreadsheet("~/Desktop/git_repos/ranglr/input/all_fields_spreadsheet.xlsx")
-get_col_names(all_fields_spreadsheet) %>%
-  dplyr::filter(stringr::str_detect(col_name, "ontology$")) %>%
-  readr::write_csv("~/Desktop/git_repos/ranglr/input/ontology_fields.csv")
-```
-
-
-```{r}
-ontology_lookup <- lapply(ontologies, query_hca_ontology_term)
-```
-
 
 <!-- Leaving this here because I might be able to use simliar code and don't want
 to forget about these functions-->

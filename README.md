@@ -1,16 +1,20 @@
 # ranglr
 
-An R package with tools to help the data wrangling process
+An R package with tools to help the data wrangling process. 
 
 # Installation
 
-```
+```r
 # First install devtools if you haven't already
 install.packages("devtools")
 
 # Then install this package
 devtools::install_github("HumanCellAtlas/ranglr")
 ```
+
+# Vignettes
+
+Some minimal vignettes with example code are available in the vignettes folder.
 
 # Getting help
 

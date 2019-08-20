@@ -122,6 +122,8 @@ In this case all are okay.
 
 #### Confirm files uploaded to s3
 
+Using the functions that query from s3 buckets require that the user already has access to the HCA DCP wrangler ec2 instance.
+
 If you get the warning "Expected 4 pieces. Missing pieces filled with `NA` in 1 rows." this can be safely ignored.
 
 ```{r list_s3_files}

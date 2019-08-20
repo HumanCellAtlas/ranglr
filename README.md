@@ -2,6 +2,8 @@
 
 An R package with tools to help the data wrangling process. 
 
+Functions try to follow 'tidy' principles and include a lot of wrapper functions that use the tidyverse suite of R packages behind the scenes.
+
 # Installation
 
 ```r
@@ -15,6 +17,10 @@ devtools::install_github("HumanCellAtlas/ranglr")
 # Vignettes
 
 Some minimal vignettes with example code are available in the vignettes folder.
+
+# Contributing
+
+Contributing to code is welcomed, if you would like to add functions or edit code please make a branch off master and make a pull request when you are ready to merge.
 
 # Getting help
 

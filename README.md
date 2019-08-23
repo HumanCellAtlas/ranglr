@@ -10,8 +10,11 @@ Functions try to follow 'tidy' principles and include a lot of wrapper functions
 # First install devtools if you haven't already
 install.packages("devtools")
 
-# Then install this package
-devtools::install_github("HumanCellAtlas/ranglr")
+# then clone the repo to a local directory
+git clone git@github.com:HumanCellAtlas/ranglr.git path/to/repo/ranglr
+
+# Then install the package
+devtools::install_local(path="path/to/repo/ranglr")
 ```
 
 # Vignettes

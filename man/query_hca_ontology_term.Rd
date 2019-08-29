@@ -19,5 +19,5 @@ a dataframe with api results
 }
 \description{
 \code{query_hca_ontology_term} queries the current hca ontology using the
-hcao ols API.
+hcao ols API. **still under development**
 }

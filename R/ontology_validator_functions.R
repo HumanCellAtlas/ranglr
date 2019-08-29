@@ -7,7 +7,7 @@
 #' Query HCA ontology by term
 #'
 #' \code{query_hca_ontology_term} queries the current hca ontology using the
-#' hcao ols API.
+#' hcao ols API. **still under development**
 #'
 #' @param ontology_term a vector of string ontology terms e.g. EFO:0009737
 #' @param ontology the name of the ontology to query
@@ -41,7 +41,7 @@ query_hca_ontology_term <- function(ontology_term, ontology,
 #' Query OLS for free text
 #'
 #' \code{query_ontology_text} allows the user to query the OLS with free text
-#' using the `search` endpoint
+#' using the `search` endpoint. **still under development**
 #'
 #' @param free_text to use for the query
 #' @param base_url by default uses the hcao staging API
@@ -49,7 +49,6 @@ query_hca_ontology_term <- function(ontology_term, ontology,
 #' @param parent_term optional term that results must be a child of
 #' @return a tibble with query results
 #' @export
-#' TODO: Add functionality to restrict by ontology and parent term
 query_ontology_text <- function(free_text,
                                 base_url="https://ontology.staging.data.humancellatlas.org/api/search?q=",
                                 ontologies = NULL,

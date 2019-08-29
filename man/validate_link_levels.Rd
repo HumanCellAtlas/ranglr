@@ -4,10 +4,12 @@
 \alias{validate_link_levels}
 \title{Validate link levels}
 \usage{
-validate_link_levels(linking_df)
+validate_link_levels(linking_df, tibble_list)
 }
 \arguments{
 \item{linking_df}{output from running \code{build_linking_df}}
+
+\item{tibble_list}{the loaded spreadsheet from \code{load_spreadsheet}}
 }
 \value{
 linking_df with two additional columns

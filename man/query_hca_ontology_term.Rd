@@ -2,7 +2,7 @@
 % Please edit documentation in R/ontology_validator_functions.R
 \name{query_hca_ontology_term}
 \alias{query_hca_ontology_term}
-\title{Read current HCA ontology}
+\title{Query HCA ontology by term}
 \usage{
 query_hca_ontology_term(ontology_term, ontology,
   base_url = "https://ontology.staging.data.humancellatlas.org/api/ontologies")
@@ -18,7 +18,6 @@ query_hca_ontology_term(ontology_term, ontology,
 a dataframe with api results
 }
 \description{
-\code{get_hca_ontology} reads the current dcp ontologies from github and
-returns a dataframe. By default reads from github but can optionally supply
-a file path if up to date obo's already downloaded locally.
+\code{query_hca_ontology_term} queries the current hca ontology using the
+hcao ols API. **still under development**
 }

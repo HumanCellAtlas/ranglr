@@ -45,7 +45,7 @@ This function loads a spreadsheet into R as a list of tibble objects. The list i
 For this walkthrough we are using a spreadsheet that has been submitted to the datastore and is (https://data.humancellatlas.org/explore/projects/f8aa201c-4ff1-45a4-890e-840d63459ca2)[currently in the browser]. 
 
 ```{r load_spreadsheet}
-metadata_spreadsheet <- load_spreadsheet("../input/hca-metadata-spreadsheet-GSE95459-GSE114374-colon.xlsx")
+metadata_spreadsheet <- load_spreadsheet("input/hca-metadata-spreadsheet-GSE95459-GSE114374-colon.xlsx")
 names(metadata_spreadsheet)
 ```
 
@@ -111,6 +111,18 @@ linking_df %>%
 ```
 
 In this case all are okay.
+
+## Query Zoom for ontology annotations
+
+```{r}
+response <- query_zoom("hypertension", "mondo")
+query_ontology_text("depressive disorder") %>%
+  dplyr::filter(stringr::str_detect(ontology_name, "mondo"))
+
+query_ontology_text("depression") %>%
+  dplyr::filter(stringr::str_detect(ontology_name, "mondo"))
+```
+
 
 ## Secondary wrangler review process
 

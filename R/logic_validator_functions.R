@@ -66,14 +66,15 @@ build_type_module_lookup <- function(tibble_list) {
 #' elegantly written.
 #'
 #' @param linking_df output from running \code{build_linking_df}
+#' @param tibble_list the loaded spreadsheet from \code{load_spreadsheet}
 #' @return linking_df with two additional columns
 #' @export
-validate_link_levels <- function(linking_df) {
+validate_link_levels <- function(linking_df, tibble_list) {
   all_1_in_2 <- rep(FALSE, length(linking_df$sheet_name_1))
   all_2_in_1 <- rep(FALSE, length(linking_df$sheet_name_1))
   for (i in 1:length(linking_df$sheet_name_1)) {
-    tab_1_fields <- dplyr::pull(metadata_spreadsheet[[linking_df$sheet_name_1[i]]][linking_df$linking_field[i]])
-    tab_2_fields <- dplyr::pull(metadata_spreadsheet[[linking_df$sheet_name_2[i]]][linking_df$linking_field[i]])
+    tab_1_fields <- dplyr::pull(tibble_list[[linking_df$sheet_name_1[i]]][linking_df$linking_field[i]])
+    tab_2_fields <- dplyr::pull(tibble_list[[linking_df$sheet_name_2[i]]][linking_df$linking_field[i]])
     tab_1_split <- unlist(lapply(tab_1_fields, split_field_list))
     tab_2_split <- unlist(lapply(tab_2_fields, split_field_list))
     tab_1_levels <- levels(factor(tab_1_split))

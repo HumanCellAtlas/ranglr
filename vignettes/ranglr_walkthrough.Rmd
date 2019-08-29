@@ -112,6 +112,18 @@ linking_df %>%
 
 In this case all are okay.
 
+## Query Zoom for ontology annotations
+
+```{r}
+response <- query_zoom("hypertension", "mondo")
+query_ontology_text("depressive disorder") %>%
+  dplyr::filter(stringr::str_detect(ontology_name, "mondo"))
+
+query_ontology_text("depression") %>%
+  dplyr::filter(stringr::str_detect(ontology_name, "mondo"))
+```
+
+
 ## Secondary wrangler review process
 
 <!-- ### Reconstruct experiment -->

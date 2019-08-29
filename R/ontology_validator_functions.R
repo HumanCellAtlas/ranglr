@@ -4,11 +4,10 @@
 
 # ontology must be in the HCA ontology
 
-#' Read current HCA ontology
+#' Query HCA ontology by term
 #'
-#' \code{get_hca_ontology} reads the current dcp ontologies from github and
-#' returns a dataframe. By default reads from github but can optionally supply
-#' a file path if up to date obo's already downloaded locally.
+#' \code{query_hca_ontology_term} queries the current hca ontology using the
+#' hcao ols API.
 #'
 #' @param ontology_term a vector of string ontology terms e.g. EFO:0009737
 #' @param ontology the name of the ontology to query
@@ -37,4 +36,34 @@ query_hca_ontology_term <- function(ontology_term, ontology,
     dplyr::select(terms.obo_id, terms.label, terms.is_obsolete, terms.description)
 
   return(results)
+}
+
+#' Query OLS for free text
+#'
+#' \code{query_ontology_text} allows the user to query the OLS with free text
+#' using the `search` endpoint
+#'
+#' @param free_text to use for the query
+#' @param base_url by default uses the hcao staging API
+#' @param ontologies optional vector of ontologies to query
+#' @param parent_term optional term that results must be a child of
+#' @return a tibble with query results
+#' @export
+#' TODO: Add functionality to restrict by ontology and parent term
+query_ontology_text <- function(free_text,
+                                base_url="https://ontology.staging.data.humancellatlas.org/api/search?q=",
+                                ontologies = NULL,
+                                parent_term = NULL) {
+  free_text <- stringr::str_replace_all(free_text, " ", "+")
+  api_query = paste0(base_url,"/", free_text)
+  print(api_query)
+  request <- httr::GET(url = api_query)
+
+  if(request$status_code != 200){
+    stop(paste0("API call unsuccessful with status code ", request$status_code, "."))
+  }
+
+  response <- httr::content(request, as = "text", encoding = "UTF-8")
+  json_list <- jsonlite::fromJSON(response, flatten = TRUE)
+  return(json_list[["response"]][["docs"]])
 }

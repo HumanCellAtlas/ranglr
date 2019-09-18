@@ -102,7 +102,7 @@ check_uploaded_files <- function(ssheet_file_names, s3_file_names) {
     message("All Spreadsheet files present in s3 bucket")
   } else {
     missing_files <- ssheet_file_names[which(!ssheet_file_names %in% s3_file_names)]
-    warning(paste0("There are ", length(missing_files), " files not in the spreadsheet that are not in the s3 bucket:\n",
+    warning(paste0("There are ", length(missing_files), " files in the spreadsheet that are not in the s3 bucket:\n",
                    paste0(missing_files,
                    collapse = "\n"), "\n\n"))
   }

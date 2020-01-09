@@ -24,21 +24,30 @@ ssh_ec2 <- function(username, ec2_url="tool.staging.data.humancellatlas.org") {
 #' @export
 # TODO: write code to ensure it doesn't error or at least hide the error message
 list_s3_files <- function(s3_url, user) {
-  this_connection <- ssh_ec2(username = user)
-  this_command <- paste0("aws s3 ls ", s3_url)
-  out <- ssh::ssh_exec_internal(this_connection,
-                                command = this_command)
-  ssh::ssh_disconnect(this_connection)
+  tryCatch({
+    this_connection <- ssh_ec2(username = user)
+    this_command <- paste0("aws s3 ls ", s3_url)
+    out <- ssh::ssh_exec_internal(this_connection,
+                                  command = this_command)
+    ssh::ssh_disconnect(this_connection)
+    filename_df <- stringr::str_split(rawToChar(out$stdout), "\\n",
+                                      simplify = T) %>%
+      as.data.frame() %>%
+      t() %>%
+      tibble::as_tibble() %>%
+      tidyr::separate(col = V1, sep = "[[:space:]]+",
+                      into = c("date", "time", "size", "file_name")) %>%
+      dplyr::filter(!is.na(file_name))
+    return(filename_df)
+  },
+  error=function(cond){
+    message("s3 probably empty, original error message:")
+    message(cond)
+    return(NA)
+  }
+  )
 
-  filename_df <- stringr::str_split(rawToChar(out$stdout), "\\n",
-                                    simplify = T) %>%
-    as.data.frame() %>%
-    t() %>%
-    tibble::as_tibble() %>%
-    tidyr::separate(col = V1, sep = "[[:space:]]+",
-                    into = c("date", "time", "size", "file_name")) %>%
-    dplyr::filter(!is.na(file_name))
-  return(filename_df)
+
 }
 
 #' Create s3 upload area

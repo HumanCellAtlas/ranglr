@@ -43,6 +43,7 @@ list_s3_files <- function(s3_url, user) {
   error=function(cond){
     message("s3 probably empty, original error message:")
     message(cond)
+    ssh::ssh_disconnect(this_connection)
     return(NA)
   }
   )
